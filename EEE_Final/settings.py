@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # built in apps:
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'monitoringSite.apps.MonitoringsiteConfig',
+
+    # 3rd party
+    "django_extensions",
+
+    # my apps:
+    'patient_view',
 ]
 
 MIDDLEWARE = [
