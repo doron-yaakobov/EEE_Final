@@ -14,8 +14,29 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import HttpResponse, JsonResponse
 from django.urls import include, path
 
+
+# VIEW FUNCTIONS
+def home(request):
+    # assert False, "<Assertion Message>"
+    return HttpResponse(f"Hello world!!!")
+
+
+def patient_id(request, id: int):
+    return HttpResponse(f"<b>Patient ID is:</b> {id}")
+    # return JsonResponse()
+
+
+# URLS/ URLCONF:
 urlpatterns = [
+    path('', home),
+
+    path('patients/<int:id>/', patient_id),
+    path('patients/', patient_id, {
+        "id": 209495381
+    }),
+
     path('admin/', admin.site.urls),
 ]
