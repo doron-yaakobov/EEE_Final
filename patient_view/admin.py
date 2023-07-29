@@ -3,6 +3,7 @@ from . import models
 
 
 # admin view
+@admin.register(models.Patient)  # defining admin view for the provided model
 class PatientAdmin(admin.ModelAdmin):
     date_hierarchy = "enter_date"
     search_fields = (
@@ -23,4 +24,4 @@ class PatientAdmin(admin.ModelAdmin):
 
 
 # Register your models here.
-admin.site.register(models.Patient, PatientAdmin)
+# admin.site.register(models.Patient, PatientAdmin)
