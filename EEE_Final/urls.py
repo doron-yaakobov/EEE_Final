@@ -17,26 +17,27 @@ from django.contrib import admin
 from django.http import HttpResponse, JsonResponse
 from django.urls import include, path
 
-
 # VIEW FUNCTIONS
-def home(request):
-    # assert False, "<Assertion Message>"
-    return HttpResponse(f"Hello world!!!")
+# def home(request):
+#     # assert False, "<Assertion Message>"
+#     return HttpResponse(f"Hello world!!!")
 
 
-def patient_id(request, id: int):
-    return HttpResponse(f"<b>Patient ID is:</b> {id}")
-    # return JsonResponse()
+# def patient_id(request, id: int):
+#     return HttpResponse(f"<b>Patient ID is:</b> {id}")
+#     # return JsonResponse()
 
 
 # URLS/ URLCONF:
 urlpatterns = [
-    path('', home),
+    # path('', home),
 
-    path('patients/<int:id>/', patient_id),
-    path('patients/', patient_id, {
-        "id": 209495381
-    }),
+    # path('patients/<int:id>/', patient_id),
+
+    # path('patients/', patient_id, {
+    #     "id": 209495381
+    # }),
 
     path('admin/', admin.site.urls),
+    path("", include("patient_view.urls"))
 ]
