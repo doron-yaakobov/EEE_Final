@@ -9,6 +9,7 @@ class PatientAdmin(admin.ModelAdmin):
         "id",
         "enter_date",
         "patient_id",
+        # "full_name",
         "last_name",
         "first_name",
         "food_cosher",
