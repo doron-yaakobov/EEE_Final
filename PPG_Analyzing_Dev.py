@@ -1,7 +1,7 @@
 import re
 
 # region init
-patient_data = {}
+data = {}
 file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
 
 
@@ -115,34 +115,91 @@ def detect_peaks(signal: list, threshold: float = 0.5) -> list:
     return peaks
 
 
+def calculate_pulse_rate(patient_data: dict) -> dict:
+    """
+    Calculate the theoretical pulse rates based on the Photoplethysmogram (PPG) signals for each patient.
+
+    Parameters:
+        patient_data (dict): A dictionary containing patient PPG data.
+
+    Returns:
+        dict: A dictionary containing the theoretical pulse rates for IR and Red signals for each patient.
+
+    Raises:
+        KeyError: If 'ir_peaks_idx' or 'red_peaks_idx' keys are not present in the patient data.
+    """
+    pulse_rates = {}
+
+    for patient_id, data in patient_data.items():
+        # Check if 'ir_peaks_idx' and 'red_peaks_idx' keys are present in the data
+        if 'ir_peaks_idx' not in data or 'red_peaks_idx' not in data:
+            raise KeyError("Keys 'ir_peaks_idx' and 'red_peaks_idx' must be present in patient_data.")
+
+        ir_peak_times = [data['time_in_msec'][idx] for idx in data['ir_peaks_idx']]
+        red_peak_times = [data['time_in_msec'][idx] for idx in data['red_peaks_idx']]
+
+        ir_time_intervals = [ir_peak_times[i] - ir_peak_times[i - 1] for i in range(1, len(ir_peak_times))]
+        red_time_intervals = [red_peak_times[i] - red_peak_times[i - 1] for i in range(1, len(red_peak_times))]
+
+        # Constants for converting time intervals to pulse rates
+        MILLISECONDS_PER_MINUTE = 60000
+
+        ir_pulse_rate = MILLISECONDS_PER_MINUTE / sum(ir_time_intervals) if len(ir_time_intervals) > 0 else 0
+        red_pulse_rate = MILLISECONDS_PER_MINUTE / sum(red_time_intervals) if len(red_time_intervals) > 0 else 0
+
+        pulse_rates[patient_id] = {'ir_pulse_rate': ir_pulse_rate, 'red_pulse_rate': red_pulse_rate}
+
+    return pulse_rates
+
+
+def calculate_pulse_rate(patient_data: dict) -> dict:
+    pulse_rates = {}
+    for patient_id, data in patient_data.items():
+        ir_peak_times = [data['time_in_msec'][idx] for idx in data['ir_peaks_idx']]
+        red_peak_times = [data['time_in_msec'][idx] for idx in data['red_peaks_idx']]
+
+        ir_time_intervals = [ir_peak_times[i] - ir_peak_times[i - 1] for i in range(1, len(ir_peak_times))]
+        red_time_intervals = [red_peak_times[i] - red_peak_times[i - 1] for i in range(1, len(red_peak_times))]
+
+        ir_pulse_rate = 60000 / sum(ir_time_intervals) if len(ir_time_intervals) > 0 else 0
+        red_pulse_rate = 60000 / sum(red_time_intervals) if len(red_time_intervals) > 0 else 0
+
+        pulse_rates[patient_id] = {'ir_pulse_rate': ir_pulse_rate, 'red_pulse_rate': red_pulse_rate}
+
+    return pulse_rates
+
+
 def main():
-    global patient_data
+    global data
     global file_path
 
     patient_data = read_ppg_data(file_path, patient_data)
 
     # region Peak Detection for each user -> patient_data.patient_id.(ir_peaks_idx & red_peaks_idx)
-    for pat_id, pat_data in patient_data.items():
+    for patient_id, patient_data in patient_data.items():
         # region init
-        ir_fifo = pat_data['ir_fifo']
-        red_fifo = pat_data['red_fifo']
+        ir_fifo = patient_data['ir_fifo']
+        red_fifo = patient_data['red_fifo']
         # endregion
 
         ir_peaks_idx = detect_peaks(ir_fifo)
         red_peaks_idx = detect_peaks(red_fifo)
 
-        pat_data['ir_peaks_idx'] = ir_peaks_idx if ("ir_peaks_idx" not in pat_data) else (
-                pat_data['ir_peaks_idx'] + ir_peaks_idx)
-        pat_data['red_peaks_idx'] = red_peaks_idx if ("red_peaks_idx" not in pat_data) else (
-                pat_data['red_peaks_idx'] + red_peaks_idx)
+        patient_data['ir_peaks_idx'] = ir_peaks_idx if ("ir_peaks_idx" not in patient_data) else (
+                patient_data['ir_peaks_idx'] + ir_peaks_idx)
+        patient_data['red_peaks_idx'] = red_peaks_idx if ("red_peaks_idx" not in patient_data) else (
+                patient_data['red_peaks_idx'] + red_peaks_idx)
     # endregion
 
-    # time_in_msec = pat_data['time_in_msec']
+    pulse_rate = calculate_pulse_rate(patient_data)
+    # time_in_msec = patient_data['time_in_msec']
 
     # region Cleanup Analyzed PPG measures
-    for pat_id in patient_data:
-        patient_data[pat_id]["ir_fifo"] = []
-        patient_data[pat_id]["red_fifo"] = []
+    for patient_id in patient_data:
+        patient_data[patient_id]["ir_fifo"] = []
+        patient_data[patient_id]["red_fifo"] = []
+        patient_data[patient_id]["time_in_msec"] = []
+
     # endregion
 
 
