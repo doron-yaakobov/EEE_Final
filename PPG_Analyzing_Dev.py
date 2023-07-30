@@ -120,25 +120,29 @@ def main():
     global file_path
 
     patient_data = read_ppg_data(file_path, patient_data)
-    # region Peak Detection for each user
-    for user_id, user_data in patient_data.items():
-        ir_fifo = user_data['ir_fifo']
-        red_fifo = user_data['red_fifo']
-        time_in_msec = user_data['time_in_msec']
 
-        ir_peaks = detect_peaks(ir_fifo)
-        red_peaks = detect_peaks(red_fifo)
-        if 'ir_peaks' in user_data:
-            ir_peaks = user_data['ir_peaks'] + ir_peaks
-        if 'red_peaks' in user_data:
-            red_peaks = user_data['red_peaks'] + red_peaks
-        user_data['ir_peaks'] = ir_peaks
-        user_data['red_peaks'] = red_peaks
+    # region Peak Detection for each user -> patient_data.patient_id.(ir_peaks_idx & red_peaks_idx)
+    for pat_id, pat_data in patient_data.items():
+        # region init
+        ir_fifo = pat_data['ir_fifo']
+        red_fifo = pat_data['red_fifo']
+        # endregion
+
+        ir_peaks_idx = detect_peaks(ir_fifo)
+        red_peaks_idx = detect_peaks(red_fifo)
+
+        pat_data['ir_peaks_idx'] = ir_peaks_idx if ("ir_peaks_idx" not in pat_data) else (
+                pat_data['ir_peaks_idx'] + ir_peaks_idx)
+        pat_data['red_peaks_idx'] = red_peaks_idx if ("red_peaks_idx" not in pat_data) else (
+                pat_data['red_peaks_idx'] + red_peaks_idx)
     # endregion
+
+    # time_in_msec = pat_data['time_in_msec']
+
     # region Cleanup Analyzed PPG measures
-    for user_id in patient_data:
-        patient_data[user_id]["ir_fifo"] = []
-        patient_data[user_id]["red_fifo"] = []
+    for pat_id in patient_data:
+        patient_data[pat_id]["ir_fifo"] = []
+        patient_data[pat_id]["red_fifo"] = []
     # endregion
 
 
