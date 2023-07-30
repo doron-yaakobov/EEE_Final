@@ -2,7 +2,7 @@ import re
 
 # region init
 data = {}
-file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
+file_path = r'/PPG_EXAMPLE_v2.txt'
 
 
 # endregion

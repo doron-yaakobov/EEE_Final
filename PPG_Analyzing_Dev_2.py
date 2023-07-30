@@ -3,7 +3,9 @@ import numpy as np
 from scipy.signal import find_peaks
 
 # region init
-data = {}
+data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [75.70977917981071], 'red_fifo': [], 'res_time_in_msec': [164387],
+                    'time_in_msec': []}}
+# data = {}
 file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
 SAMPLING_RATE = 100  # Hz
 
@@ -145,21 +147,27 @@ def main():
         # endregion
         pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal)
         # region save results
-        patient_data["pulse_rate_bpm"] = patient_data["pulse_rate_bpm"].append(pulse_rate_bpm) if ("pulse_rate_bpm" in patient_data) \
-            else [pulse_rate_bpm]
-        patient_data["res_time_in_msec"] = patient_data["res_time_in_msec"].append(last_measure_time) \
-            if ("res_time_in_msec" in patient_data) else [last_measure_time]
+        if "pulse_rate_bpm" in patient_data:
+            patient_data["pulse_rate_bpm"].append(pulse_rate_bpm)
+        else:
+            patient_data["pulse_rate_bpm"] = [pulse_rate_bpm]
+
+        if "res_time_in_msec" in patient_data:
+            if last_measure_time <= patient_data["res_time_in_msec"][-1]:
+                last_measure_time = patient_data["res_time_in_msec"][-1] + last_measure_time
+            patient_data["res_time_in_msec"].append(last_measure_time)
+        else:
+            patient_data["res_time_in_msec"] = [last_measure_time]
+
         # endregion
     # endregion
 
-    # region Cleanup Analyzed PPG measures
+    # region Cleanup Analyzed PPG measures, making place for next measures.
     for _, patient_data in data.items():
         patient_data["ir_fifo"] = []
         patient_data["red_fifo"] = []
         patient_data["time_in_msec"] = []
     # endregion
-
-    pass
 
 
 if __name__ == "__main__":
