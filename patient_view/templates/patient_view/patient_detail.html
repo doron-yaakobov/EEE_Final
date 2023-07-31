@@ -19,49 +19,41 @@
         </div>
 
         <h2>Vital Sign Records</h2>
-        <div class="row">
-            <div class="col">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Heart Rate</th>
-                            <th>SPO2</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for vital_sign in vital_signs %}
-                        <tr>
-                            <td>{{ vital_sign.timestamp }}</td>
-                            <td>{{ vital_sign.heart_rate }}</td>
-                            <td>{{ vital_sign.spo2 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Heart Rate</th>
+                    <th>SPO2</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vital_sign in vital_signs %}
+                <tr>
+                    <td>{{ vital_sign.timestamp }}</td>
+                    <td>{{ vital_sign.heart_rate }}</td>
+                    <td>{{ vital_sign.spo2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <!-- Add a form to allow Nurses to add new vital sign records -->
-        <div class="row">
-            <div class="col">
-                <h2>Add New Vital Sign Record</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="form-row">
-                        <div class="form-group col">
-                            <label for="heart_rate">Heart Rate:</label>
-                            <input type="number" name="heart_rate" class="form-control" required>
-                        </div>
-                        <div class="form-group col">
-                            <label for="spo2">SPO2:</label>
-                            <input type="number" name="spo2" class="form-control" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Record</button>
-                </form>
+        <h2>Add New Vital Sign Record</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="heart_rate">Heart Rate:</label>
+                    <input type="number" class="form-control" name="heart_rate" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="spo2">SPO2:</label>
+                    <input type="number" class="form-control" name="spo2" required>
+                </div>
             </div>
-        </div>
+            <button type="submit" class="btn btn-primary">Add Record</button>
+        </form>
 
         <!-- Add a back button to return to the patient list page -->
         <div class="row mt-3">
@@ -70,72 +62,37 @@
             </div>
         </div>
 
-        <!-- Add plots to show vital sign trends -->
+        <!-- Render Heart Rate Plot -->
         <div class="row mt-5">
             <div class="col">
-                <div id="heartRatePlot"></div>
+                <h2>Heart Rate Plot</h2>
+                <div id="heart_rate_plot"></div>
             </div>
         </div>
+
+        <!-- Render SPO2 Plot -->
         <div class="row mt-5">
             <div class="col">
-                <div id="spo2Plot"></div>
+                <h2>SPO2 Plot</h2>
+                <div id="spo2_plot"></div>
             </div>
         </div>
+
     </div>
 
-    <!-- Add Bootstrap JS and Plotly scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Add Plotly CDN -->
+    <!-- Add Plotly JavaScript -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
+    <!-- Add your custom JavaScript code here (if needed) -->
     <script>
-        // Fetch the vital sign data from the server and create the plots
-        document.addEventListener("DOMContentLoaded", function () {
-            // Fetch vital sign data using AJAX or JavaScript fetch API
-            fetch("/api/vitalsigns/{{ patient.patient_id }}/")
-                .then(response => response.json())
-                .then(data => {
-                    // Extract data for plotting
-                    const timestamps = data.map(v => v.timestamp);
-                    const heartRates = data.map(v => v.heart_rate);
-                    const spo2 = data.map(v => v.spo2);
+        // Load the Heart Rate Plot
+        var heart_rate_plot_data = {{ heart_rate_plot_json|safe }};
+        Plotly.plot('heart_rate_plot', heart_rate_plot_data.data, heart_rate_plot_data.layout);
 
-                    // Create heart rate plot
-                    const heartRateTrace = {
-                        x: timestamps,
-                        y: heartRates,
-                        mode: "lines+markers",
-                        name: "Heart Rate",
-                    };
-
-                    const heartRateLayout = {
-                        title: "Heart Rate Trends",
-                        xaxis: { title: "Timestamp" },
-                        yaxis: { title: "Heart Rate" },
-                    };
-
-                    Plotly.newPlot("heartRatePlot", [heartRateTrace], heartRateLayout);
-
-                    // Create SPO2 plot
-                    const spo2Trace = {
-                        x: timestamps,
-                        y: spo2,
-                        mode: "lines+markers",
-                        name: "SPO2",
-                    };
-
-                    const spo2Layout = {
-                        title: "SPO2 Trends",
-                        xaxis: { title: "Timestamp" },
-                        yaxis: { title: "SPO2" },
-                    };
-
-                    Plotly.newPlot("spo2Plot", [spo2Trace], spo2Layout);
-                })
-                .catch(error => console.error("Error fetching vital sign data:", error));
-        });
+        // Load the SPO2 Plot
+        var spo2_plot_data = {{ spo2_plot_json|safe }};
+        Plotly.plot('spo2_plot', spo2_plot_data.data, spo2_plot_data.layout);
     </script>
+
 </body>
 </html>
