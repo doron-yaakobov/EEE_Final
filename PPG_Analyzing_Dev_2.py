@@ -1,11 +1,12 @@
+import gc
 import re
 import numpy as np
 from scipy.signal import find_peaks
 
 # region init
-data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [75.70977917981071], 'red_fifo': [], 'res_time_in_msec': [164387],
-                    'time_in_msec': []}}
-data = {}
+data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [80], 'red_fifo': [], 'res_time_in_msec': [170000],
+                    'spo2_percent': [99], 'time_in_msec': []}}
+# data = {}
 file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
 SAMPLING_RATE = 100  # Hz
 
@@ -134,43 +135,90 @@ def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sa
     return pulse_rate_bpm
 
 
+def calculate_spo2(red_signal: np.ndarray, infrared_signal: np.ndarray) -> float or None:
+    """
+    Calculate oxygen saturation (SpO2) from red and infrared PPG signals.
+
+    Parameters:
+        red_signal (list or numpy array): List of red PPG signal values.
+        infrared_signal (list or numpy array): List of infrared PPG signal values.
+
+    Returns:
+        oxygen_saturation (float): Calculated oxygen saturation in percentage.
+    """
+    # Check if the lengths of the red and infrared signals match
+    if len(red_signal) != len(infrared_signal):
+        return None
+
+    # Simple AC components:
+    ac_red = max(red_signal) - min(red_signal)
+    ac_ir = max(infrared_signal) - min(infrared_signal)
+    # Calculate the ratio R
+    r_ratio = ac_red / ac_ir
+    # Calculate SpO2 using the calibration curve
+    oxygen_saturation = min(100, 110 - (12 * r_ratio))
+
+    return oxygen_saturation
+
+
+def save_pulse_rate(patient_data: dict, pulse_rate_bpm: float) -> dict:
+    if "pulse_rate_bpm" in patient_data:
+        patient_data["pulse_rate_bpm"].append(pulse_rate_bpm)
+    else:
+        patient_data["pulse_rate_bpm"] = [pulse_rate_bpm]
+    return patient_data
+
+
+def save_res_time(patient_data: dict, res_time_in_msec: int) -> dict:
+    if "res_time_in_msec" in patient_data:
+        if patient_data["res_time_in_msec"][-1] >= res_time_in_msec:
+            patient_data["res_time_in_msec"].append(res_time_in_msec + patient_data["res_time_in_msec"][-1])
+        else:
+            patient_data["res_time_in_msec"].append(res_time_in_msec)
+    else:
+        patient_data["res_time_in_msec"] = [res_time_in_msec]
+    return patient_data
+
+
+def save_spo2(patient_data: dict, spo2: float) -> dict:
+    if "spo2_percent" in patient_data:
+        patient_data["spo2_percent"].append(spo2)
+    else:
+        patient_data["spo2_percent"] = [spo2]
+    return patient_data
+
+
 def main():
     global data
     global file_path
 
-    data = parse_and_load_ppg_data(file_path, data)
+    while True:
+        data = parse_and_load_ppg_data(file_path, data)
 
-    # region Calculate Pulse Rate
-    for patient_id, patient_data in data.items():
-        # region INIT
-        red_signal = np.array(patient_data['red_fifo'])
-        ir_signal = np.array(patient_data['ir_fifo'])
-        last_measure_time = patient_data["time_in_msec"][-1]
+        for patient_id, patient_data in data.items():
+            # region INIT
+            red_signal = np.array(patient_data['red_fifo'])
+            ir_signal = np.array(patient_data['ir_fifo'])
+            last_measure_time = patient_data["time_in_msec"][-1]
+            # endregion
+
+            pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal)
+            oxygen_saturation_percent = calculate_spo2(red_signal=red_signal, infrared_signal=ir_signal)
+
+            # region save results
+            patient_data = save_pulse_rate(patient_data, pulse_rate_bpm)
+            patient_data = save_res_time(patient_data, last_measure_time)
+            patient_data = save_spo2(patient_data, oxygen_saturation_percent)
+            # endregion
+
+        # region Cleanup Analyzed PPG measures, making place for next measures.
+        for _, patient_data in data.items():
+            patient_data["ir_fifo"] = []
+            patient_data["red_fifo"] = []
+            patient_data["time_in_msec"] = []
+            gc.collect()
         # endregion
-        pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal)
-        # region save results
-        if "pulse_rate_bpm" in patient_data:
-            patient_data["pulse_rate_bpm"].append(pulse_rate_bpm)
-        else:
-            patient_data["pulse_rate_bpm"] = [pulse_rate_bpm]
-
-        if "res_time_in_msec" in patient_data:
-            if last_measure_time <= patient_data["res_time_in_msec"][-1]:
-                last_measure_time = patient_data["res_time_in_msec"][-1] + last_measure_time
-            patient_data["res_time_in_msec"].append(last_measure_time)
-        else:
-            patient_data["res_time_in_msec"] = [last_measure_time]
-
-        # endregion
-    # endregion
-
-    # region Cleanup Analyzed PPG measures, making place for next measures.
-    for _, patient_data in data.items():
-        patient_data["ir_fifo"] = []
-        patient_data["red_fifo"] = []
-        patient_data["time_in_msec"] = []
-    # endregion
-    pass
+        pass
 
 
 if __name__ == "__main__":
