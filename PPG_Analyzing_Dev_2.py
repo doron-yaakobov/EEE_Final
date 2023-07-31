@@ -4,15 +4,13 @@ import numpy as np
 from scipy.signal import find_peaks
 
 # region init
-data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [80], 'red_fifo': [], 'res_time_in_msec': [170000],
-                    'spo2_percent': [99], 'time_in_msec': []}}
-# data = {}
+# data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [80], 'red_fifo': [], 'res_time_in_msec': [170000], 'spo2_percent': [99], 'time_in_msec': []}}
+data = {}
 file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
 SAMPLING_RATE = 100  # Hz
 
 
 # endregion
-
 # region Load data utils:
 def time_to_milliseconds(time_str: str) -> int:
     """
@@ -161,6 +159,7 @@ def calculate_spo2(red_signal: np.ndarray, infrared_signal: np.ndarray) -> float
     return oxygen_saturation
 
 
+# region Save utils:
 def save_pulse_rate(patient_data: dict, pulse_rate_bpm: float) -> dict:
     if "pulse_rate_bpm" in patient_data:
         patient_data["pulse_rate_bpm"].append(pulse_rate_bpm)
@@ -188,6 +187,8 @@ def save_spo2(patient_data: dict, spo2: float) -> dict:
     return patient_data
 
 
+# endregion
+
 def main():
     global data
     global file_path
@@ -201,10 +202,8 @@ def main():
             ir_signal = np.array(patient_data['ir_fifo'])
             last_measure_time = patient_data["time_in_msec"][-1]
             # endregion
-
             pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal)
             oxygen_saturation_percent = calculate_spo2(red_signal=red_signal, infrared_signal=ir_signal)
-
             # region save results
             patient_data = save_pulse_rate(patient_data, pulse_rate_bpm)
             patient_data = save_res_time(patient_data, last_measure_time)
