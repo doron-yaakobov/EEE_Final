@@ -5,14 +5,14 @@ from scipy.signal import find_peaks
 # region init
 data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [75.70977917981071], 'red_fifo': [], 'res_time_in_msec': [164387],
                     'time_in_msec': []}}
-# data = {}
+data = {}
 file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
 SAMPLING_RATE = 100  # Hz
 
 
 # endregion
 
-
+# region Load data utils:
 def time_to_milliseconds(time_str: str) -> int:
     """
     Convert time in the format 'HH:MM:SS.mSec' to an integer representing total milliseconds.
@@ -99,6 +99,8 @@ def parse_and_load_ppg_data(file_path: str, ppg_data: dict) -> dict:
     return ppg_data
 
 
+# endregion
+
 def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sampling_rate_hz: int = SAMPLING_RATE,
                          peak_distance_seconds: float = 0.7) -> float:
     """
@@ -168,6 +170,7 @@ def main():
         patient_data["red_fifo"] = []
         patient_data["time_in_msec"] = []
     # endregion
+    pass
 
 
 if __name__ == "__main__":
