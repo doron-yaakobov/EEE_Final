@@ -1,34 +1,184 @@
-<h1>Patients</h1>
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Management System</title>
+    <style>
+        /* Your CSS styles go here */
+        /* ... (existing styles) ... */
 
-<table border="1">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Full Name</th>
-        <th>Enter Date</th>
-        <th>Description</th>
-        <th>Birth Date</th>
-    </tr>
-    </thead>
-    {% for patient in patients %}
-        <tr>
-            <td>{{ patient.patient_id }}</td>
-            <td>{{ patient.full_name }}</td>
-            <td>{{ patient.enter_date }}</td>
-            <td>{{ patient.description }}</td>
-            <td>{{ patient.birth_date }}</td>
-        </tr>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
 
-    {% endfor %}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-</table>
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-<hr>
-<ul>unordered list
-    <li>list item</li>
-</ul>
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
 
-<hr>
-<ol><b>ordered list</b>
-    <li>list item</li>
-</ol>
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Filter Styles */
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-select {
+            padding: 8px;
+        }
+
+        /* Search Box Styles */
+        .search-box {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Nurse Dashboard Styles */
+        .dashboard {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .dashboard h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .dashboard p {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Patient Management System</h1>
+
+        <div class="filters">
+            <div class="filter-select">
+                <!-- Add filter options here (if needed) -->
+            </div>
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by ID, Full Name, Age, or Description...">
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <h2>Nurse Dashboard</h2>
+            <p>Welcome, Nurse [Nurse Name]! This is your patient management dashboard. You can search for patients by ID, Full Name, Age, or Description using the search box above. The table below displays the patient details:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Age</th>
+                        <th>Enter Date</th>
+                        <th>Enter Time</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.patient_id }}</td>
+                        <td>{{ patient.full_name }}</td>
+                        <td>{{ patient.birth_date|calculate_age }}</td>
+                        <td>{{ patient.enter_date|date:'d.m.Y' }}</td>
+                        <td>{{ patient.enter_date|time:'H:i' }}</td>
+                        <td>{{ patient.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function searchPatients() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            const table = document.querySelector("table");
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) { // Start at index 1 to skip table header row
+                const cells = rows[i].getElementsByTagName("td");
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cellValue = cells[j].innerText.toLowerCase();
+                    if (cellValue.includes(input)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", searchPatients);
+    </script>
+</body>
+</html>
