@@ -3,9 +3,27 @@ from .models import Patient, VitalSign
 import plotly.graph_objs as go
 import plotly.express as px
 
+
 def patients_list(request):
-    patients = Patient.objects.all()
-    return render(request, 'patient_view/patient_list.html', {'patients': patients})
+    # Get the search filter option and search query from the request parameters
+    filter_option = request.GET.get('filter_option', '')
+    search_query = request.GET.get('search_query', '')
+
+    # Query the patients based on the selected filter option and search query
+    if filter_option == 'id':
+        patients = Patient.objects.filter(patient_id__icontains=search_query)
+    elif filter_option == 'full_name':
+        patients = Patient.objects.filter(full_name__icontains=search_query)
+    elif filter_option == 'age':
+        patients = Patient.objects.filter(birth_date__icontains=search_query)
+    elif filter_option == 'description':
+        patients = Patient.objects.filter(description__icontains=search_query)
+    else:
+        patients = Patient.objects.all()
+
+    context = {'patients': patients}
+    return render(request, 'patient_view/patient_list.html', context)
+
 
 def patient_detail(request, patient_id):
     patient = get_object_or_404(Patient, patient_id=patient_id)

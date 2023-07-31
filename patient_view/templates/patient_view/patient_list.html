@@ -10,16 +10,16 @@
         /* Rest of the CSS styles from your previous code */
         /* ... */
 
-        /* Add the following CSS styles to preserve the design */
+        <!-- Add the following CSS styles to preserve the design -->
 
-        /* Container styles */
+        <!-- Container styles -->
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* Table Styles */
+        <!-- Table Styles -->
         table {
             width: 100%;
             border-collapse: collapse;
@@ -46,7 +46,7 @@
             background-color: #e0e0e0;
         }
 
-        /* Filter Styles */
+        <!-- Filter Styles -->
         .filters {
             display: flex;
             justify-content: space-between;
@@ -58,10 +58,12 @@
             padding: 8px;
         }
 
-        /* Search Box Styles */
+        <!-- Search Box Styles -->
         .search-box {
             flex: 1;
             margin-left: 10px;
+            display: flex;
+            align-items: center;
         }
 
         .search-input {
@@ -72,7 +74,16 @@
             border-radius: 4px;
         }
 
-        /* Nurse Dashboard Styles */
+        .search-button {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        <!-- Nurse Dashboard Styles -->
         .dashboard {
             background-color: #f2f2f2;
             padding: 20px;
@@ -89,7 +100,7 @@
             margin-bottom: 20px;
         }
 
-        /* Responsive Styles */
+        <!-- Responsive Styles -->
         @media screen and (max-width: 768px) {
             table {
                 font-size: 14px;
@@ -102,46 +113,80 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Patient Management System</h1>
+<div class="container">
+    <h1>Patient Management System</h1>
 
-        <div class="filters">
-            <!-- Filter options and search box -->
-        </div>
-
-        <div class="dashboard">
-            <h2>Nurse Dashboard</h2>
-            <p>Welcome, Nurse [Nurse Name]! This is your patient management dashboard. You can search for patients by ID, Full Name, or Description using the search box above. The table below displays the patient details:</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Full Name</th>
-                        <th>Age</th>
-                        <th>Enter Date</th>
-                        <th>Enter Time</th>
-                        <th>Description</th>
-                        <th>Details</th> <!-- New column for the hyperlink -->
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for patient in patients %}
-                    <tr>
-                        <td>{{ patient.patient_id }}</td>
-                        <td>{{ patient.full_name }}</td>
-                        <td>{{ patient.birth_date|calculate_age }}</td>
-                        <td>{{ patient.enter_date|date:'d.m.Y' }}</td>
-                        <td>{{ patient.enter_date|time:'H:i' }}</td>
-                        <td>{{ patient.description }}</td>
-                        <td><a href="{% url 'patient_detail' patient_id=patient.patient_id %}">Details</a></td> <!-- Hyperlink to the patient details page -->
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="filters">
+        <form method="get" action="{% url 'patients_list' %}">
+            <select name="filter_option" class="filter-select">
+                <option value="id">ID</option>
+                <option value="full_name">Full Name</option>
+                <option value="age">Age</option>
+                <option value="description">Description</option>
+            </select>
+            <div class="search-box">
+                <input type="text" name="search_query" class="search-input" placeholder="Search..." oninput="handleLiveSearch(this)">
+            </div>
+        </form>
     </div>
 
-    <!-- Your JavaScript code and other content go here -->
+    <div class="dashboard">
+        <h2>Nurse Dashboard</h2>
+        <p>Welcome, Nurse [Nurse Name]! This is your patient management dashboard. You can search for patients by ID,
+            Full Name, Age, or Description using the search box above. The table below displays the patient details:</p>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Full Name</th>
+                <th>Age</th>
+                <th>Enter Date</th>
+                <th>Enter Time</th>
+                <th>Description</th>
+                <th>Details</th> <!-- New column for the hyperlink -->
+            </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.patient_id }}</td>
+                    <td>{{ patient.full_name }}</td>
+                    <td>{{ patient.birth_date|calculate_age }}</td>
+                    <td>{{ patient.enter_date|date:'d.m.Y' }}</td>
+                    <td>{{ patient.enter_date|time:'H:i' }}</td>
+                    <td>{{ patient.description }}</td>
+                    <td><a href="{% url 'patient_detail' patient_id=patient.patient_id %}">Details</a></td>
+                    <!-- Hyperlink to the patient details page -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
+<!-- Your JavaScript code and other content go here -->
+
+<script>
+    // Live search function to handle search as the user types
+    function handleLiveSearch(input) {
+        const searchQuery = input.value.trim().toLowerCase();
+        const tableBody = document.getElementById("tableBody");
+        const rows = tableBody.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            const patientId = rows[i].getElementsByTagName("td")[0].textContent.trim().toLowerCase();
+            const fullName = rows[i].getElementsByTagName("td")[1].textContent.trim().toLowerCase();
+            const age = rows[i].getElementsByTagName("td")[2].textContent.trim().toLowerCase();
+            const description = rows[i].getElementsByTagName("td")[5].textContent.trim().toLowerCase();
+            const patientMatches = patientId.includes(searchQuery) || fullName.includes(searchQuery) || age.includes(searchQuery) || description.includes(searchQuery);
+
+            if (patientMatches) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+</script>
 </body>
 </html>
