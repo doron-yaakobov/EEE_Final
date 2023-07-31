@@ -23,3 +23,19 @@ class Patient(models.Model):
     def save(self, *args, **kwargs):
         self.full_name = f"{self.last_name} {self.first_name}"
         super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('patient_id',)
+
+
+class VitalSign(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    heart_rate = models.PositiveIntegerField()
+    spo2 = models.PositiveIntegerField()
+
+    # Add more fields here for blood pressure and temperature if you want to record them
+    # Note: We will use dummy values for blood pressure and temperature
+
+    def __str__(self):
+        return f"{self.patient} - {self.timestamp}"

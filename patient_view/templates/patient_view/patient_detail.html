@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Detail</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Patient Details: {{ patient.full_name }}</h1>
+
+        <!-- Display patient information here -->
+        <div class="row">
+            <div class="col">
+                <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
+                <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
+                <!-- Add more patient information as needed -->
+            </div>
+        </div>
+
+        <h2>Vital Sign Records</h2>
+        <div class="row">
+            <div class="col">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Heart Rate</th>
+                            <th>SPO2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital_sign in vital_signs %}
+                        <tr>
+                            <td>{{ vital_sign.timestamp }}</td>
+                            <td>{{ vital_sign.heart_rate }}</td>
+                            <td>{{ vital_sign.spo2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add a form to allow Nurses to add new vital sign records -->
+        <div class="row">
+            <div class="col">
+                <h2>Add New Vital Sign Record</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="heart_rate">Heart Rate:</label>
+                            <input type="number" name="heart_rate" class="form-control" required>
+                        </div>
+                        <div class="form-group col">
+                            <label for="spo2">SPO2:</label>
+                            <input type="number" name="spo2" class="form-control" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Record</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add a back button to return to the patient list page -->
+        <div class="row mt-3">
+            <div class="col">
+                <a href="{% url 'patients_list' %}" class="btn btn-secondary">Back to Patient List</a>
+            </div>
+        </div>
+
+        <!-- Add plots to show vital sign trends -->
+        <div class="row mt-5">
+            <div class="col">
+                <div id="heartRatePlot"></div>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col">
+                <div id="spo2Plot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and Plotly scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Add Plotly CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <script>
+        // Fetch the vital sign data from the server and create the plots
+        document.addEventListener("DOMContentLoaded", function () {
+            // Fetch vital sign data using AJAX or JavaScript fetch API
+            fetch("/api/vitalsigns/{{ patient.patient_id }}/")
+                .then(response => response.json())
+                .then(data => {
+                    // Extract data for plotting
+                    const timestamps = data.map(v => v.timestamp);
+                    const heartRates = data.map(v => v.heart_rate);
+                    const spo2 = data.map(v => v.spo2);
+
+                    // Create heart rate plot
+                    const heartRateTrace = {
+                        x: timestamps,
+                        y: heartRates,
+                        mode: "lines+markers",
+                        name: "Heart Rate",
+                    };
+
+                    const heartRateLayout = {
+                        title: "Heart Rate Trends",
+                        xaxis: { title: "Timestamp" },
+                        yaxis: { title: "Heart Rate" },
+                    };
+
+                    Plotly.newPlot("heartRatePlot", [heartRateTrace], heartRateLayout);
+
+                    // Create SPO2 plot
+                    const spo2Trace = {
+                        x: timestamps,
+                        y: spo2,
+                        mode: "lines+markers",
+                        name: "SPO2",
+                    };
+
+                    const spo2Layout = {
+                        title: "SPO2 Trends",
+                        xaxis: { title: "Timestamp" },
+                        yaxis: { title: "SPO2" },
+                    };
+
+                    Plotly.newPlot("spo2Plot", [spo2Trace], spo2Layout);
+                })
+                .catch(error => console.error("Error fetching vital sign data:", error));
+        });
+    </script>
+</body>
+</html>

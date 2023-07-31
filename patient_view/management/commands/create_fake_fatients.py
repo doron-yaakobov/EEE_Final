@@ -14,8 +14,8 @@ class Command(BaseCommand):
         parser.add_argument('n', type=int)
 
     def handle(self, n, *args, **options):
-       Patient.objects.all().delete()   # deletes all old logs.
-       for i in range(n):
+        Patient.objects.all().delete()  # deletes all old logs.
+        for i in range(n):
             # start_enter_date = datetime.strptime('30.11.1997', '%d.%m.%Y')
             # end_enter_date = datetime.strptime('30.11.1998', '%d.%m.%Y')
             # start_exit_date = datetime.strptime('10.12.1998', '%d.%m.%Y')

@@ -7,23 +7,16 @@
         /* Your CSS styles go here */
         /* ... (existing styles) ... */
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
+        /* Rest of the CSS styles from your previous code */
+        /* ... */
 
+        /* Add the following CSS styles to preserve the design */
+
+        /* Container styles */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
         }
 
         /* Table Styles */
@@ -113,17 +106,12 @@
         <h1>Patient Management System</h1>
 
         <div class="filters">
-            <div class="filter-select">
-                <!-- Add filter options here (if needed) -->
-            </div>
-            <div class="search-box">
-                <input type="text" class="search-input" id="searchInput" placeholder="Search by ID, Full Name, Age, or Description...">
-            </div>
+            <!-- Filter options and search box -->
         </div>
 
         <div class="dashboard">
             <h2>Nurse Dashboard</h2>
-            <p>Welcome, Nurse [Nurse Name]! This is your patient management dashboard. You can search for patients by ID, Full Name, Age, or Description using the search box above. The table below displays the patient details:</p>
+            <p>Welcome, Nurse [Nurse Name]! This is your patient management dashboard. You can search for patients by ID, Full Name, or Description using the search box above. The table below displays the patient details:</p>
             <table>
                 <thead>
                     <tr>
@@ -133,6 +121,7 @@
                         <th>Enter Date</th>
                         <th>Enter Time</th>
                         <th>Description</th>
+                        <th>Details</th> <!-- New column for the hyperlink -->
                     </tr>
                 </thead>
                 <tbody>
@@ -144,6 +133,7 @@
                         <td>{{ patient.enter_date|date:'d.m.Y' }}</td>
                         <td>{{ patient.enter_date|time:'H:i' }}</td>
                         <td>{{ patient.description }}</td>
+                        <td><a href="{% url 'patient_detail' patient_id=patient.patient_id %}">Details</a></td> <!-- Hyperlink to the patient details page -->
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -151,34 +141,7 @@
         </div>
     </div>
 
-    <script>
-        function searchPatients() {
-            const input = document.getElementById("searchInput").value.toLowerCase();
-            const table = document.querySelector("table");
-            const rows = table.getElementsByTagName("tr");
+    <!-- Your JavaScript code and other content go here -->
 
-            for (let i = 1; i < rows.length; i++) { // Start at index 1 to skip table header row
-                const cells = rows[i].getElementsByTagName("td");
-                let found = false;
-
-                for (let j = 0; j < cells.length; j++) {
-                    const cellValue = cells[j].innerText.toLowerCase();
-                    if (cellValue.includes(input)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    rows[i].style.display = "";
-                } else {
-                    rows[i].style.display = "none";
-                }
-            }
-        }
-
-        const searchInput = document.getElementById("searchInput");
-        searchInput.addEventListener("input", searchPatients);
-    </script>
 </body>
 </html>
