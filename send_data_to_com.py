@@ -2,9 +2,9 @@ import serial
 import time
 import serial.tools.list_ports
 
-COM_PORT = "COM3"
+COM_PORT = "COM7"
 FREQUENCY = 100  # Hz
-BAUD_RATE = 9600
+BAUD_RATE = 115200
 
 
 def get_available_com_ports():
@@ -44,17 +44,20 @@ def send_lines_to_com_port(ser, file_path, com_port=COM_PORT, baud_rate=9600, fr
         print(f"File not found: {file_path}")
     except serial.SerialException as e:
         print(f"Serial port error: {e}")
+    except KeyboardInterrupt:
+        ser.close()
+        print(f"Serial port {com_port} closed.")
 
 
-available_com_ports = get_available_com_ports()
-print("Available COM ports:", available_com_ports)
-
-file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
-ser = serial.Serial(COM_PORT, BAUD_RATE)
-print(f"Serial port {COM_PORT} opened.")
-
-while 1:
-    send_lines_to_com_port(ser, file_path, com_port=COM_PORT, baud_rate=BAUD_RATE, frequency=FREQUENCY)
-
-ser.close()
-print("Serial port closed.")
+# available_com_ports = get_available_com_ports()
+# print("Available COM ports:", available_com_ports)
+#
+# file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
+# ser = serial.Serial(COM_PORT, BAUD_RATE)
+# print(f"Serial port {COM_PORT} opened.")
+#
+# while 1:
+#     send_lines_to_com_port(ser, file_path, com_port=COM_PORT, baud_rate=BAUD_RATE, frequency=FREQUENCY)
+#
+# ser.close()
+# print("Serial port closed.")
