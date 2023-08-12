@@ -4,7 +4,7 @@ import sys
 # Set the DJANGO_SETTINGS_MODULE environment variable
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EEE_Final.settings")
 # Add the path to your Django project's root directory
-django_project_path = r"C:\Users\dorony\PycharmProjects\EEE_Final"  # Replace with the actual path
+django_project_path = r"/"  # Replace with the actual path
 sys.path.append(django_project_path)
 # Configure Django settings
 import django
@@ -13,12 +13,12 @@ django.setup()
 
 import re
 import numpy as np
-import patient_view.utils as utils
+import utils as utils
 
 # region init
 # data = {311252977: {'ir_fifo': [], 'pulse_rate_bpm': [80], 'red_fifo': [], 'res_time_in_msec': [170000], 'spo2_percent': [99], 'time_in_msec': []}}
 data = {}
-file_path = r'C:\Users\dorony\PycharmProjects\EEE_Final\PPG_EXAMPLE_v2.txt'
+file_path = r'/Old Files/PPG_EXAMPLE_v2.txt'
 
 
 # endregion

@@ -76,5 +76,5 @@ def save_com_data_to_file(com_port=COM_PORT, baud_rate=BAUD_RATE, timeout=1):
 
 if __name__ == "__main__":
     com_port = 'COM7'
-    file_name = 'data.txt'
+    file_name = '../data.txt'
     save_com_data_to_file(com_port, file_name)
