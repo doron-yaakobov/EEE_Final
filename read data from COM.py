@@ -28,8 +28,6 @@ from send_data_to_com import *
 # ser.close()
 
 
-
-
 """
 sample: 
 Received: [00:07:43.696,350] <inf> CENTRAL: notify_func: 311252977 81469 64070
@@ -47,10 +45,10 @@ Received: [00:07:44.346,343] <inf> CENTRAL: notify_func: 311252977 81393 63976
 10 SEC at least per mesure * 100HZ = 1000 pulses at least. 
 """
 
-
 import serial
 
-def save_com_data_to_file(com_port, file_name):
+
+def save_com_data_to_file(com_port=COM_PORT, baud_rate=BAUD_RATE, timeout=1):
     try:
         # Open the COM port
         ser = serial.Serial(COM_PORT, baudrate=BAUD_RATE, timeout=1)
@@ -74,6 +72,7 @@ def save_com_data_to_file(com_port, file_name):
     finally:
         if ser.is_open:
             ser.close()
+
 
 if __name__ == "__main__":
     com_port = 'COM7'

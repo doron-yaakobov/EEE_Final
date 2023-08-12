@@ -1,11 +1,70 @@
 import numpy as np
 from scipy.signal import find_peaks
 from .models import VitalSign, Patient
+import serial
+import serial.tools.list_ports as list_ports
+from collections import deque
 
 SAMPLING_RATE = 100  # Hz
 PEAK_DISTANCE = 0.7  # Seconds
 MAX_SATURATION = 100  # %
+TIMEOUT = 1
+COM_PORT = "COM7"
+FREQUENCY = 100  # Hz
+BAUD_RATE = 115200
+MAX_DATA_POINTS = 15 * FREQUENCY  # sec * Hz
+data = dict()
 
+# region Test
+TEST_DATA = r"C:\Users\dorony\PycharmProjects\EEE_Final\data.txt"
+
+
+def import_django_for_testing():
+    import os
+    import sys
+
+    # Set the DJANGO_SETTINGS_MODULE environment variable
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "EEE_Final.settings")
+    # Add the path to your Django project's root directory
+    django_project_path = r"C:\Users\dorony\PycharmProjects\EEE_Final"  # Replace with the actual path
+    sys.path.append(django_project_path)
+    # Configure Django settings
+    import django
+    django.setup()
+
+
+def get_available_com_ports():
+    available_ports = list_ports.comports()
+    return [port.device for port in available_ports]
+
+
+def time_to_milliseconds(time_str: str) -> int:
+    """
+    Convert time in the format 'HH:MM:SS.mSec' to an integer representing total milliseconds.
+
+    Parameters:
+        time_str (str): A time string in the format 'HH:MM:SS.mSec'.
+
+    Returns:
+        int: Total milliseconds.
+
+    Example:
+        time_str = '00:01:23.456'
+        milliseconds = time_to_milliseconds(time_str)
+        # Output: 83456
+    """
+    # region split to components
+    hours, minutes, seconds_msec = time_str.split(':')
+    seconds, milliseconds = seconds_msec.split('.')
+    # endregion
+
+    # Calculate the total milliseconds
+    total_in_milliseconds = (int(hours) * 3600 + int(minutes) * 60 + int(seconds)) * 1000 + int(milliseconds)
+
+    return total_in_milliseconds
+
+
+# endregion
 
 def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sampling_rate_hz: int = SAMPLING_RATE,
                          peak_distance_seconds: float = PEAK_DISTANCE) -> int:
@@ -64,3 +123,82 @@ def save_vital_signs(patient_id: int, spo2: int, pulse_rate_bpm: int) -> None:
     patient = Patient.objects.get(patient_id=patient_id)
     vital_sign = VitalSign(patient=patient, spo2=spo2, heart_rate=pulse_rate_bpm)
     vital_sign.save()
+
+
+def analyze_com_data(com_port=COM_PORT, baud_rate=BAUD_RATE, timeout=1):
+    global data
+    try:
+        ser = serial.Serial(COM_PORT, baudrate=BAUD_RATE, timeout=1)
+        while True:
+            line = ser.readline().decode('utf-8').strip()
+
+            if line:
+                print(line)
+                is_valid_line, user_id, ir_value, red_value = extract_ppg_line(line)
+                if is_valid_line:
+                    data = update_ppg_data(user_id=user_id, ir_value=ir_value, red_value=red_value,
+                                           pre_collected_ppg_data=data, max_data_points=MAX_DATA_POINTS)
+                    ir_signal, red_signal = np.array(data[user_id]['ir_fifo']), np.array(data[user_id]['red_fifo'])
+
+                    pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal,
+                                                          sampling_rate_hz=SAMPLING_RATE,
+                                                          peak_distance_seconds=PEAK_DISTANCE)
+                    oxygen_saturation_percent = calculate_spo2(red_signal=red_signal, infrared_signal=ir_signal)
+
+                    save_vital_signs(user_id, oxygen_saturation_percent, pulse_rate_bpm)
+
+    except serial.SerialException as e:
+        print(f"Error: {e}")
+    except KeyboardInterrupt:
+        print("Saving data has been interrupted.")
+
+    finally:
+        if ser.is_open:
+            ser.close()
+
+
+def extract_ppg_line(line: str) -> (bool, int, int, int):
+    """
+    Extract PPG data from a given line.
+
+    Parameters:
+        line (str): A single line of text containing PPG data.
+
+    Returns:
+        tuple: A tuple containing the extracted data.
+               - User ID.
+               - IR value.
+               - Red value.
+    """
+    line = line.strip().split()
+    is_valid_line = (len(line) == 3) and all(measure.isdigit() for measure in line)
+    user_id, ir_value, red_value = line if is_valid_line else None, None, None
+    return is_valid_line, user_id, ir_value, red_value
+
+
+def update_ppg_data(user_id: int, ir_value: int, red_value: int,
+                    pre_collected_ppg_data: dict, max_data_points: int = MAX_DATA_POINTS) -> dict:
+    """
+    Update PPG data for a specific user with new measurements.
+
+    Parameters:
+        user_id (int): The ID of the user.
+        ir_value (int): The IR value measurement.
+        red_value (int): The red value measurement.
+        pre_collected_ppg_data (dict): A dictionary containing pre-collected user-specific PPG data.
+                        The format is: {user_id: {'ir_fifo': deque, 'red_fifo': deque}}
+
+    Returns:
+        dict: An updated dictionary containing user-specific PPG data.
+              The format is: {user_id: {'ir_fifo': deque, 'red_fifo': deque}}
+    """
+
+    is_new_user_id = user_id not in pre_collected_ppg_data
+    if is_new_user_id:
+        pre_collected_ppg_data[user_id] = {'ir_fifo': deque(maxlen=max_data_points),
+                                           'red_fifo': deque(maxlen=max_data_points)}
+
+    pre_collected_ppg_data[user_id]['ir_fifo'].append(ir_value)
+    pre_collected_ppg_data[user_id]['red_fifo'].append(red_value)
+
+    return pre_collected_ppg_data
