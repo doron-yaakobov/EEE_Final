@@ -100,6 +100,39 @@
             </div>
         </div>
 
+        <!-- Render Heart Rate Plot -->
+        <div class="row mt-5">
+            <div class="col">
+                <h2>Heart Rate Plot</h2>
+                <div id="heart_rate_plot"></div>
+            </div>
+        </div>
+
+        <!-- Render SPO2 Plot -->
+        <div class="row mt-5">
+            <div class="col">
+                <h2>SPO2 Plot</h2>
+                <div id="spo2_plot"></div>
+            </div>
+        </div>
+
+        <!-- Add a form to allow Nurses to add new vital sign records -->
+        <h2>Add New Vital Sign Record</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="heart_rate">Heart Rate:</label>
+                    <input type="number" class="form-control" name="heart_rate" required>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="spo2">SPO2:</label>
+                    <input type="number" class="form-control" name="spo2" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Record</button>
+        </form>
+
         <h2>Vital Sign Records</h2>
         <table class="table table-striped">
             <thead>
@@ -120,43 +153,10 @@
             </tbody>
         </table>
 
-        <!-- Add a form to allow Nurses to add new vital sign records -->
-        <h2>Add New Vital Sign Record</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-row">
-                <div class="form-group col-md-4">
-                    <label for="heart_rate">Heart Rate:</label>
-                    <input type="number" class="form-control" name="heart_rate" required>
-                </div>
-                <div class="form-group col-md-4">
-                    <label for="spo2">SPO2:</label>
-                    <input type="number" class="form-control" name="spo2" required>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Add Record</button>
-        </form>
-
         <!-- Add a back button to return to the patient list page -->
         <div class="row mt-3">
             <div class="col">
                 <a href="{% url 'patients_list' %}" class="btn btn-secondary">Back to Patient List</a>
-            </div>
-        </div>
-
-        <!-- Render Heart Rate Plot -->
-        <div class="row mt-5">
-            <div class="col">
-                <h2>Heart Rate Plot</h2>
-                <div id="heart_rate_plot"></div>
-            </div>
-        </div>
-
-        <!-- Render SPO2 Plot -->
-        <div class="row mt-5">
-            <div class="col">
-                <h2>SPO2 Plot</h2>
-                <div id="spo2_plot"></div>
             </div>
         </div>
 
