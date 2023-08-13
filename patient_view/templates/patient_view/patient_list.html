@@ -1,4 +1,5 @@
 {% load custom_filters %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,22 +37,37 @@
             font-size: 28px;
         }
 
-        .filter-select, .search-input, .search-button {
-            font-size: 16px;
-            border-radius: 4px;
+        /* Updated Search Box Styles */
+        .search-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        /* Updated Search Box Styles */
-        .search-input {
-            width: 100%;
-            padding: 12px;
+        .search-input,
+        .search-button {
             font-size: 16px;
-            border: 1px solid #ccc;
             border-radius: 4px;
-            padding-left: 40px; /* Add padding for icon */
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .search-input {
+            flex: 2;
+            padding-left: 40px;
             background: url('search-icon.png') no-repeat 10px center;
             background-size: 20px 20px;
         }
+
+        .search-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            flex: 0.5;
+        }
+
+        /* Rest of your CSS styles go here */
 
         /* Table Styles */
         table {
@@ -59,13 +75,13 @@
             border-collapse: collapse;
             border: 1px solid #ccc;
             background-color: #fff;
+            margin-top: 20px;
         }
 
         th, td {
             padding: 12px;
             text-align: left;
             border: 1px solid #ccc;
-            color: #333; /* Adjust text color for better readability */
         }
 
         th {
@@ -81,7 +97,21 @@
             background-color: #e0e0e0;
         }
 
-        /* Rest of your CSS styles go here */
+        /* Increase font size and improve contrast */
+        th, td {
+            font-size: 14px;
+            color: #333; /* Darker text color */
+        }
+
+        /* Add padding to cells */
+        th, td {
+            padding: 12px 20px; /* More horizontal padding */
+        }
+
+        /* Add slight shadow to cells on hover for depth */
+        tr:hover td {
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
 
         /* Media queries and responsive styles remain the same */
     </style>
@@ -92,16 +122,11 @@
 
     <div class="filters">
         <form method="get" action="{% url 'patients_list' %}">
-            <select name="filter_option" class="filter-select">
-                <option value="id">ID</option>
-                <option value="full_name">Full Name</option>
-                <option value="age">Age</option>
-                <option value="description">Description</option>
-            </select>
             <div class="search-box">
                 <input type="text" name="search_query" class="search-input"
                        placeholder="Search for patients by ID, Full Name, Age, or Description"
                        oninput="handleLiveSearch(this)">
+                <button type="submit" class="search-button">Search</button>
             </div>
         </form>
     </div>
