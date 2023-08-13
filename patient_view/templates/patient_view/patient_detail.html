@@ -4,7 +4,6 @@
     <title>Patient Detail</title>
     <style>
         /* Your existing CSS styles go here */
-
         /* Additional styling for Patient Detail page */
         body {
             margin: 0;
@@ -169,11 +168,47 @@
     <script>
         // Load the Heart Rate Plot
         var heart_rate_plot_data = {{ heart_rate_plot_json|safe }};
-        Plotly.plot('heart_rate_plot', heart_rate_plot_data.data, heart_rate_plot_data.layout);
+        var heartRatePlot = Plotly.newPlot('heart_rate_plot', heart_rate_plot_data.data, {
+            ...heart_rate_plot_data.layout,
+            title: 'Heart Rate Plot',
+            xaxis: {
+                title: 'Time',
+                showgrid: false,
+            },
+            yaxis: {
+                title: 'Heart Rate (bpm)',
+                showgrid: true,
+            },
+            plot_bgcolor: 'rgba(0, 0, 0, 0)',
+            paper_bgcolor: '#f8f9fa',
+        });
+
+        // Reduce marker opacity for the Heart Rate Plot
+        heartRatePlot.then(function () {
+            Plotly.restyle('heart_rate_plot', 'marker.opacity', 0.5);
+        });
 
         // Load the SPO2 Plot
         var spo2_plot_data = {{ spo2_plot_json|safe }};
-        Plotly.plot('spo2_plot', spo2_plot_data.data, spo2_plot_data.layout);
+        var spo2Plot = Plotly.newPlot('spo2_plot', spo2_plot_data.data, {
+            ...spo2_plot_data.layout,
+            title: 'SPO2 Plot',
+            xaxis: {
+                title: 'Time',
+                showgrid: false,
+            },
+            yaxis: {
+                title: 'SPO2 (%)',
+                showgrid: true,
+            },
+            plot_bgcolor: 'rgba(0, 0, 0, 0)',
+            paper_bgcolor: '#f8f9fa',
+        });
+
+        // Reduce marker opacity for the SPO2 Plot
+        spo2Plot.then(function () {
+            Plotly.restyle('spo2_plot', 'marker.opacity', 0.5);
+        });
     </script>
 
 </body>
