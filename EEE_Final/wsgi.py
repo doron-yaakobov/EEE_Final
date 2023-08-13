@@ -10,11 +10,12 @@ https://docs.djangoproject.com/en/4.1/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-from utils import analyze_test_data, analyze_com_data
+from utils import analyze_test_data, analyze_com_data,get_available_com_ports
 import threading
 
 
 def start_analysis_thread():
+    print(f"INFO: Available COM ports: {get_available_com_ports()}")
     print("INFO: Initiating Analyze data thread!")
     analyze_test_data()
     # analyze_com_data()
