@@ -46,6 +46,29 @@ def import_django_for_testing():
     django.setup()
 
 
+def analyze_test_data(file: str = TEST_DATA):
+    global data
+    with open(file, "r") as file:
+        for line in file:
+            line = line.strip()
+
+            if line:
+                # print(line)
+                is_valid_line, user_id, ir_value, red_value = extract_ppg_line(line)
+                if is_valid_line:
+                    data = update_ppg_data(user_id=user_id, ir_value=ir_value, red_value=red_value,
+                                           pre_collected_ppg_data=data, max_data_points=MAX_DATA_POINTS)
+                    ir_signal, red_signal = np.array(data[user_id]['ir_fifo']), np.array(data[user_id]['red_fifo'])
+
+                    pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal,
+                                                          sampling_rate_hz=SAMPLING_RATE,
+                                                          peak_distance_seconds=PEAK_DISTANCE)
+                    oxygen_saturation_percent = calculate_spo2(red_signal=red_signal, infrared_signal=ir_signal)
+
+                    if pulse_rate_bpm != 0 and len(red_signal) % 50 == 0:
+                        save_vital_signs(user_id, oxygen_saturation_percent, pulse_rate_bpm)
+
+
 def get_available_com_ports():
     available_ports = list_ports.comports()
     return [port.device for port in available_ports]
@@ -77,58 +100,8 @@ def time_to_milliseconds(time_str: str) -> int:
     return total_in_milliseconds
 
 
-def analyze_test_data(file: str = TEST_DATA):
-    global data
-    with open(file, "r") as file:
-        for line in file:
-            line = line.strip()
-
-            if line:
-                print(line)
-                is_valid_line, user_id, ir_value, red_value = extract_ppg_line(line)
-                if is_valid_line:
-                    data = update_ppg_data(user_id=user_id, ir_value=ir_value, red_value=red_value,
-                                           pre_collected_ppg_data=data, max_data_points=MAX_DATA_POINTS)
-                    ir_signal, red_signal = np.array(data[user_id]['ir_fifo']), np.array(data[user_id]['red_fifo'])
-
-                    pulse_rate_bpm = calculate_pulse_rate(red_signal=red_signal, infrared_signal=ir_signal,
-                                                          sampling_rate_hz=SAMPLING_RATE,
-                                                          peak_distance_seconds=PEAK_DISTANCE)
-                    oxygen_saturation_percent = calculate_spo2(red_signal=red_signal, infrared_signal=ir_signal)
-
-                    if pulse_rate_bpm != 0 and len(red_signal) % 50 == 0:
-                        save_vital_signs(user_id, oxygen_saturation_percent, pulse_rate_bpm)
-
-
 # endregion
 
-# def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sampling_rate_hz: int = SAMPLING_RATE,
-#                          peak_distance_seconds: float = PEAK_DISTANCE) -> int:
-#     """
-#     Calculate pulse rate from red and infrared PPG signals.
-#
-#     Args:
-#         red_signal (numpy array): PPG signal from the red wavelength.
-#         infrared_signal (numpy array): PPG signal from the infrared wavelength.
-#         sampling_rate_hz (int): Sampling rate of the PPG signals in Hz.
-#         peak_distance_seconds (float): Define the time window for peak detection (adjust as needed)
-#
-#     Returns:
-#         int: Estimated pulse rate in beats per minute (BPM).
-#     """
-#
-#     # Find peaks in the red and infrared signals
-#     red_peaks, _ = find_peaks(red_signal, distance=int(sampling_rate_hz * peak_distance_seconds))
-#     infrared_peaks, _ = find_peaks(infrared_signal, distance=int(sampling_rate_hz * peak_distance_seconds))
-#     # Calculate time intervals between successive peaks
-#     red_intervals_seconds = np.diff(red_peaks) / sampling_rate_hz
-#     infrared_intervals_seconds = np.diff(infrared_peaks) / sampling_rate_hz
-#     # Choose which signal to use based on the number of detected peaks
-#     time_intervals_seconds = red_intervals_seconds if len(red_intervals_seconds) > len(infrared_intervals_seconds) \
-#         else infrared_intervals_seconds
-#     # Calculate pulse rate (beats per minute)
-#     pulse_rate_bpm = 60 / np.mean(time_intervals_seconds)
-#     return int(pulse_rate_bpm)
 def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sampling_rate_hz: int = SAMPLING_RATE,
                          peak_distance_seconds: float = PEAK_DISTANCE) -> int:
     """
@@ -161,31 +134,6 @@ def calculate_pulse_rate(red_signal: np.ndarray, infrared_signal: np.ndarray, sa
     # Calculate pulse rate (beats per minute)
     pulse_rate_bpm = 60 / np.mean(time_intervals_seconds)
     return int(pulse_rate_bpm)
-
-
-# def calculate_spo2(red_signal: np.ndarray, infrared_signal: np.ndarray) -> int or None:
-#     """
-#     Calculate oxygen saturation (SpO2) from red and infrared PPG signals.
-#
-#     Parameters:
-#         red_signal (list or numpy array): List of red PPG signal values.
-#         infrared_signal (list or numpy array): List of infrared PPG signal values.
-#
-#     Returns:
-#         oxygen_saturation (int): Calculated oxygen saturation in percentage.
-#     """
-#     # Check if the lengths of the red and infrared signals match
-#     if len(red_signal) != len(infrared_signal):
-#         return None
-#     # Simple AC components:
-#     ac_red = max(red_signal) - min(red_signal)
-#     ac_ir = max(infrared_signal) - min(infrared_signal)
-#     # Calculate the ratio R
-#     r_ratio = ac_red / ac_ir
-#     # Calculate SpO2 using the calibration curve
-#     oxygen_saturation = min(MAX_SATURATION, 110 - (12 * r_ratio))
-#     return int(oxygen_saturation)
-import numpy as np
 
 
 def calculate_spo2(red_signal: np.ndarray, infrared_signal: np.ndarray) -> int or None:
@@ -231,7 +179,7 @@ def analyze_com_data(com_port=COM_PORT, baud_rate=BAUD_RATE, timeout=1):
             line = ser.readline().decode('utf-8').strip()
 
             if line:
-                print(line)
+                # print(line)
                 is_valid_line, user_id, ir_value, red_value = extract_ppg_line(line)
                 if is_valid_line:
                     data = update_ppg_data(user_id=user_id, ir_value=ir_value, red_value=red_value,

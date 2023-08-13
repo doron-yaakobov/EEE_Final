@@ -1,8 +1,11 @@
 from django.db import models
 from django.utils import timezone
+from datetime import datetime, timedelta
 
 
 class Patient(models.Model):
+    default_birth_date = datetime.now() - timedelta(days=(365 * 18))
+
     created_at = models.DateTimeField(auto_now_add=True)
     first_name = models.CharField(max_length=46)
     last_name = models.CharField(max_length=46)
@@ -13,7 +16,7 @@ class Patient(models.Model):
     enter_date = models.DateTimeField(default=timezone.now)
     leave_date = models.DateTimeField(default=None, null=True, blank=True)
     description = models.TextField(default=None, null=True, blank=True)
-    birth_date = models.DateField(default=None, null=True, blank=True)
+    birth_date = models.DateField(default=default_birth_date, blank=True)
     food_cosher = models.BooleanField(default=None, null=True, blank=True)
     food_diary_restricted = models.BooleanField(default=None, null=True, blank=True)
 
