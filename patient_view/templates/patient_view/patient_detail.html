@@ -21,7 +21,7 @@
             max-width: 1200px;
         }
 
-        h1, h2 {
+        h1 {
             margin-bottom: 20px;
             font-size: 24px;
         }
@@ -99,18 +99,15 @@
             </div>
         </div>
 
-        <!-- Render Heart Rate Plot -->
+        <!-- Render Plots -->
         <div class="row mt-5">
             <div class="col">
-                <h2>Heart Rate Plot</h2>
+                <h2 class="text-center mb-4">Plots</h2>
                 <div id="heart_rate_plot"></div>
             </div>
         </div>
-
-        <!-- Render SPO2 Plot -->
         <div class="row mt-5">
             <div class="col">
-                <h2>SPO2 Plot</h2>
                 <div id="spo2_plot"></div>
             </div>
         </div>
@@ -173,13 +170,15 @@
             title: 'Heart Rate Plot',
             xaxis: {
                 title: 'Time',
-                showgrid: false,
+                showgrid: true,
+                gridcolor: '#ddd',
             },
             yaxis: {
                 title: 'Heart Rate (bpm)',
                 showgrid: true,
+                gridcolor: '#ddd',
             },
-            plot_bgcolor: 'rgba(0, 0, 0, 0)',
+            plot_bgcolor: '#fff',
             paper_bgcolor: '#f8f9fa',
         });
 
@@ -195,13 +194,15 @@
             title: 'SPO2 Plot',
             xaxis: {
                 title: 'Time',
-                showgrid: false,
+                showgrid: true,
+                gridcolor: '#ddd',
             },
             yaxis: {
                 title: 'SPO2 (%)',
                 showgrid: true,
+                gridcolor: '#ddd',
             },
-            plot_bgcolor: 'rgba(0, 0, 0, 0)',
+            plot_bgcolor: '#fff',
             paper_bgcolor: '#f8f9fa',
         });
 
