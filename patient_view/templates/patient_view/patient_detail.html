@@ -3,13 +3,18 @@
 <head>
     <title>Patient Detail</title>
     <style>
-        /* Your existing CSS styles go here */
-        /* Additional styling for Patient Detail page */
-        body {
+        /* Reset some default styles */
+        body, h1, h2, h3, p, table {
             margin: 0;
+            padding: 0;
+        }
+
+        /* Global styles */
+        body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
             color: #333;
+            line-height: 1.6;
         }
 
         .container {
@@ -21,16 +26,91 @@
             max-width: 1200px;
         }
 
+        /* Header styles */
         h1 {
+            font-size: 28px;
             margin-bottom: 20px;
-            font-size: 24px;
-            position: sticky;
-            top: 0;
-            background-color: #fff;
-            z-index: 1;
         }
 
-        /* Rest of your CSS styles go here */
+        /* Patient info styles */
+        .patient-info {
+            background-color: #f2f2f2;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Plot container styles */
+        .plot-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Form styling */
+        form {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        /* Button styling */
+        .btn-primary, .btn-secondary {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #ccc;
+            border: none;
+            color: #333;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            background-color: #0056b3;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
     </style>
     <!-- Add Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -39,26 +119,20 @@
     <div class="container mt-5">
         <h1>Patient Details: {{ patient.full_name }}</h1>
 
-        <!-- Display patient information here -->
-        <div class="row">
-            <div class="col">
-                <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
-                <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
-                <!-- Add more patient information as needed -->
-            </div>
+        <!-- Display patient information -->
+        <div class="patient-info">
+            <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
+            <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
+            <!-- Add more patient information as needed -->
         </div>
 
         <!-- Render Plots -->
-        <div class="row mt-5">
-            <div class="col">
-                <h2 class="text-center mb-4">Plots</h2>
-                <div id="heart_rate_plot"></div>
-            </div>
+        <div class="plot-container">
+            <h2 class="text-center mb-4">Plots</h2>
+            <div id="heart_rate_plot"></div>
         </div>
-        <div class="row mt-5">
-            <div class="col">
-                <div id="spo2_plot"></div>
-            </div>
+        <div class="plot-container">
+            <div id="spo2_plot"></div>
         </div>
 
         <!-- Add a form to allow Nurses to add new vital sign records -->
