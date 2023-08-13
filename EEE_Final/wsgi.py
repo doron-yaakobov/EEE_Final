@@ -15,7 +15,7 @@ import threading
 
 
 def start_analysis_thread():
-    print("Initiating Analyze data thread!")
+    print("INFO: Initiating Analyze data thread!")
     analyze_test_data()
     # analyze_com_data()
 
