@@ -29,7 +29,7 @@ MAX_DATA_POINTS = 15 * FREQUENCY  # sec * Hz
 data = dict()
 
 # region Test
-TEST_DATA = r"C:\Users\dorony\PycharmProjects\EEE_Final\data.txt"
+TEST_DATA = r"C:\Users\dorony\PycharmProjects\EEE_Final_V2\data_2.txt"
 
 
 def import_django_for_testing():
@@ -217,7 +217,7 @@ def extract_ppg_line(line: str) -> (bool, int, int, int):
                - IR value.
                - Red value.
     """
-    line = line.strip().split()
+    line = line.strip().split()[1:]
     is_valid_line = (len(line) == 3) and all(measure.isdigit() for measure in line)
     user_id, ir_value, red_value = line if is_valid_line else [None, None, None]
     return is_valid_line, user_id, ir_value, red_value
