@@ -239,5 +239,32 @@
         });
     </script>
 
+    <script>
+        // Function to update row styles based on SPO2 and heart rate values
+        function updateRowStyles() {
+            var rows = document.querySelectorAll('table tbody tr');
+
+            rows.forEach(function(row) {
+                var heartRateCell = row.querySelector('td:nth-child(2)');
+                var spo2Cell = row.querySelector('td:nth-child(3)');
+
+                var heartRateValue = parseInt(heartRateCell.textContent);
+                var spo2Value = parseInt(spo2Cell.textContent);
+
+                if (heartRateValue < 60 || heartRateValue > 100 || spo2Value < 85) {
+                    row.style.backgroundColor = 'red';
+                    row.style.color = 'white'; // Optionally, change text color for better visibility
+                } else {
+                    row.style.backgroundColor = ''; // Reset background color
+                    row.style.color = ''; // Reset text color
+                }
+            });
+        }
+
+        // Call the function initially to apply styles
+        updateRowStyles();
+
+    </script>
+
 </body>
 </html>
